@@ -4,11 +4,14 @@ from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from passlib.hash import sha256_crypt
 import gc
 import os
+import sys
+
 
 app = Flask(__name__)
 
 @app.route('/')
 def homepage():
+
     return render_template("main.html")
 
 @app.route('/dashboard/')
@@ -22,8 +25,9 @@ def login_page():
         c, conn = connection()
         if request.method == "POST":
 
-            data = c.execute("SELECT * FROM users WHERE username = (%s)",request.form['username'])
-
+            userInput = request.form['username'];
+            data = c.execute("SELECT * FROM users WHERE username = (%s) or email = (%s)", (userInput, userInput))
+            # print(data, file=sys.stderr)
             data = c.fetchone()[2]
 
             if sha256_crypt.verify(request.form['password'], data):
